@@ -1,0 +1,12 @@
+syntax = "proto3";
+
+package proto;
+
+service communication {
+    rpc Process(Message) returns (Message) {}
+}
+
+message Message {
+    uint64 id = 1;
+    bytes data = 2;
+}
