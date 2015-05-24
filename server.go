@@ -13,7 +13,7 @@ func (f *Framework) startRPC() {
 	s.Serve(f.ln)
 }
 
-func (f *Framework) Process(ctx context.Context, input *pb.Message) (*pb.Message, error) {
-	go f.TaskCore.Process(ctx, input.Id, input.Data)
+func (f *Framework) Process(ctx context.Context, req *pb.Message) (*pb.Message, error) {
+	go f.TaskCore.Process(ctx, req.Id, req.Data)
 	return new(pb.Message), nil
 }

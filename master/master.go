@@ -14,8 +14,8 @@ import (
 type FrameworkWithMaster struct {
 	taskcore.Framework
 	Master
-	states map[uint64][]byte
-	ln     net.Listener // master rpc server listener
+	TaskMaster
+	ln net.Listener // master rpc server listener
 }
 
 type framework struct {
@@ -52,11 +52,13 @@ func (f *FrameworkWithMaster) Retrieve(ctx context.Context, id uint64) (state []
 	return nil
 }
 
-func (f *FrameworkWithMaster) RecordRPC(context.Context, *pb.RecordRequest) (*pb.RecordReply, error) {
+func (f *FrameworkWithMaster) RecordRPC(ctx context.Context, req *pb.RecordRequest) (reply *pb.RecordReply, err error) {
+	f.TaskMaster.Record(ctx, req.Id, req.State)
 	return new(pb.RecordReply), nil
 }
 
-func (f *FrameworkWithMaster) RetrieveRPC(context.Context, *pb.RetrieveRequest) (reply *pb.RetrieveReply, err error) {
-
+func (f *FrameworkWithMaster) RetrieveRPC(ctx context.Context, req *pb.RetrieveRequest) (reply *pb.RetrieveReply, err error) {
+	reply = new(pb.RetrieveReply)
+	reply.State = f.TaskMaster.Retrieve(ctx, req.Id)
 	return reply, nil
 }
