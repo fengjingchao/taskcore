@@ -12,6 +12,10 @@ import (
 	"google.golang.org/grpc"
 )
 
+const (
+	masterID = 0
+)
+
 type FrameworkWithMaster struct {
 	taskcore.Framework
 	Master
@@ -43,7 +47,7 @@ func (f *FrameworkWithMaster) startMasterRPC() {
 }
 
 func (f *FrameworkWithMaster) Record(ctx context.Context, id uint64, state []byte) error {
-	cc, err := grpcutil.GetConn(f.EtcdClient, f.JobName, id)
+	cc, err := grpcutil.GetConn(f.EtcdClient, f.JobName, masterID)
 	if err != nil {
 		// TODO: retry
 		f.Logger.Panic(err)
@@ -62,7 +66,7 @@ func (f *FrameworkWithMaster) Record(ctx context.Context, id uint64, state []byt
 }
 
 func (f *FrameworkWithMaster) Retrieve(ctx context.Context, id uint64) ([]byte, error) {
-	cc, err := grpcutil.GetConn(f.EtcdClient, f.JobName, id)
+	cc, err := grpcutil.GetConn(f.EtcdClient, f.JobName, masterID)
 	if err != nil {
 		// TODO: retry
 		f.Logger.Panic(err)
