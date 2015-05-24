@@ -5,10 +5,9 @@ import (
 	"net"
 
 	"github.com/coreos/go-etcd/etcd"
+	"github.com/taskgraph/taskcore/pkg/grpcutil"
 	pb "github.com/taskgraph/taskcore/proto"
-	"github.com/taskgraph/taskgraph/pkg/etcdutil"
 	"golang.org/x/net/context"
-	"google.golang.org/grpc"
 )
 
 type Framework struct {
@@ -21,14 +20,10 @@ type Framework struct {
 }
 
 func (f *Framework) Send(ctx context.Context, id uint64, data []byte) error {
-	addr, err := etcdutil.GetAddress(f.EtcdClient, f.JobName, id)
+	cc, err := grpcutil.GetConn(f.EtcdClient, f.JobName, id)
 	if err != nil {
 		// TODO: retry
-		f.Logger.Panicf("getAddress(%d) failed: %v", id, err)
-	}
-	cc, err := grpc.Dial(addr)
-	if err != nil {
-		f.Logger.Panicf("grpc.Dial to task %d (addr: %s) failed: %v", id, addr, err)
+		f.Logger.Panic(err)
 	}
 	defer cc.Close()
 	c := pb.NewCommunicationClient(cc)
