@@ -42,7 +42,7 @@ func (f *FrameworkWithMaster) startMasterRPC() {
 	s.Serve(f.ln)
 }
 
-func (f *FrameworkWithMaster) Record(ctx context.Context, id uint64, state []byte) {
+func (f *FrameworkWithMaster) Record(ctx context.Context, id uint64, state []byte) error {
 	cc, err := grpcutil.GetConn(f.EtcdClient, f.JobName, id)
 	if err != nil {
 		// TODO: retry
@@ -58,9 +58,10 @@ func (f *FrameworkWithMaster) Record(ctx context.Context, id uint64, state []byt
 	if err != nil {
 		f.Logger.Panicf("should retry on networking error")
 	}
+	return nil
 }
 
-func (f *FrameworkWithMaster) Retrieve(ctx context.Context, id uint64) (state []byte) {
+func (f *FrameworkWithMaster) Retrieve(ctx context.Context, id uint64) ([]byte, error) {
 	cc, err := grpcutil.GetConn(f.EtcdClient, f.JobName, id)
 	if err != nil {
 		// TODO: retry
@@ -75,7 +76,7 @@ func (f *FrameworkWithMaster) Retrieve(ctx context.Context, id uint64) (state []
 	if err != nil {
 		f.Logger.Panicf("should retry on networking error")
 	}
-	return reply.State
+	return reply.State, nil
 }
 
 func (f *FrameworkWithMaster) RecordRPC(ctx context.Context, req *pb.RecordRequest) (reply *pb.RecordReply, err error) {
